@@ -1,0 +1,16 @@
+http://www.bubuko.com/infodetail-1853263.html
+
+smilejay.com/2016/09/kvm-nat-networking/
+
+基于以上两个教程实现qemu nat 上网
+
+1/  主机安装必要的软件包：bridge-utils、iptables和dnsmasq等
+
+2/  准备一个为客户机建立NAT用的qemu-ifup脚本及关闭网络用的qemu-ifdown脚本。这两个脚本中的$1（传递给它们的第一个参数）就是在客户机中使用的网络接口在宿主机中的虚拟网络名称（如tap0、tap1等）。
+其中，在启动客户机时建立网络的脚本示例（/etc/qemu-ifup-NAT）如下，主要功能是：建立bridge，设置bridge的内网IP（此处为192.168.122.1），并且将客户机的网络接口与其绑定，然后打开系统中网络IP包转发的功能，设置iptables的NAT规则，最后启动dnsmasq作为一个简单的DHCP服务器。
+
+3/  当启动客户机时，使用上面提到的启动脚本。创建客户机的qemu-kvm命令行如下：
+qemu-system-x86_64 rhel6u3.img -m 1024 -smp 2 -net nic -net \ tap,script=/etc/qemu-ifup-NAT,downscript=/etc/qemu-ifdown-NAT
+
+qemu-system-x86_64  -drive ome/ubuntu/build-panda/x86_64-softmmu/ 		debian_wheezy_i386_standard.qcow2 -m 1024  -monitor stdio -net nic -net tap,ifname=tap1,script=/etc/qemu-ifup-NAT,downscript=/etc/qemu-ifdown-NAT
+
